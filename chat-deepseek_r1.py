@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
@@ -21,8 +22,8 @@ with st.form("llm-form"):
     submit = st.form_submit_button("Submit")
 
 
-def generate_response(chat_histroy):
-    chat_template = ChatPromptTemplate.from_messages(chat_histroy)
+def generate_response(chat_history):
+    chat_template = ChatPromptTemplate.from_messages(chat_history)
     chain = chat_template|model|StrOutputParser()
     response = chain.invoke({})
 
@@ -52,6 +53,7 @@ if submit and text:
 
 st.write('## Chat History')
 for chat in reversed(st.session_state['chat_history']):
+       clean_response = re.sub(r'<think>.*?</think>', '', chat['assistant'], flags=re.DOTALL).strip()
        st.write(f"**:adult: User**: {chat['user']}")
-       st.write(f"**:brain: Assistant**: {chat['assistant']}")
+       st.write(f"**:brain: Assistant**: {clean_response}")
        st.write("---")
